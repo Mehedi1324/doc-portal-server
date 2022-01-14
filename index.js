@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require('dotenv').config();
-// const admin = require("firebase-admin");
+const admin = require("firebase-admin");
 const { MongoClient } = require('mongodb');
 const ObjectId = require("mongodb").ObjectId;
 const port = process.env.PORT || 5000;
@@ -10,10 +10,10 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const fileUpload = require("express-fileUpload");
 
 
-// const serviceAccount = require("Download kora file er location ekhane boshate hobe")
-// admin.initializeApp({
-//     Credential: admin.Credential.cert(serviceAccount)
-// });
+const serviceAccount = require("./docsportal-firebaseKey.json")
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
 app.use(cors());
 app.use(express.json());
@@ -28,7 +28,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 async function verifyToken(req, res, next) {
-    if (req.headers?.authrization?.startsWith("Bearer")) {
+    if (req.headers?.authrization?.startsWith("Bearer ")) {
         const token = req.headers.authrization.split("")[1];
 
         try {
@@ -51,7 +51,7 @@ async function run() {
         const usersCollection = database.collection("users");
         const doctorsCollection = database.collection("doctors")
         // Getting data from storage
-        app.get("/appointments", async (req, res) => {
+        app.get("/appointments", verifyToken, async (req, res) => {
             const email = req.query.email;
             const date = new Date(req.query.date).toLocaleDateString();
             const query = { email: email, date: date };
