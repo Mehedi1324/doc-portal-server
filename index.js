@@ -16,8 +16,8 @@ admin.initializeApp({
 });
 
 app.use(cors());
-app.use(express.json());
 app.use(fileUpload());
+app.use(express.json());
 
 
 
